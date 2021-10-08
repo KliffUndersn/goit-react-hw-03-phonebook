@@ -4,6 +4,7 @@ import { ContactList } from './ContactList/ContactList';
 import { FilterContacts } from './FilterContacts/FilterContacts';
 
 export default class InputForm extends Component {
+
   state = {
     contacts: [
       {id: 'id-1', name: 'Rosie Simpson', number: '459-12-56'},
@@ -16,6 +17,17 @@ export default class InputForm extends Component {
     number: ''
     
   };
+
+  componentDidMount() {
+  this.setState({contacts:JSON.parse(localStorage.getItem('ContactList'))})
+  }
+
+  componentDidUpdate(_, contactList) {
+    localStorage.setItem('ContactList', JSON.stringify(this.state.contacts));
+  }
+  
+  
+
   handleChange = ({ target }) => {
     this.setState({
       [target.name]: target.value,
