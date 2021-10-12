@@ -1,12 +1,12 @@
+import { Component } from 'react';
 import { useState, useEffect } from 'react';
 import { v4 as generate } from 'uuid';
 import { ContactList } from './ContactList/ContactList';
 import { FilterContacts } from './FilterContacts/FilterContacts';
-import useLocalStorage from '../../hooks/useLocalStorage'
 
-const InputForm =() => {
+export default class InputForm extends Component {
 
- const [state,setState] = useState({
+  state = {
     contacts: [
       {id: 'id-1', name: 'Rosie Simpson', number: '459-12-56'},
       {id: 'id-2', name: 'Hermione Kline', number: '443-89-12'},
@@ -17,58 +17,56 @@ const InputForm =() => {
     filter: '',
     number: ''
     
-  })
+  };
 
+  componentDidMount() {
+    if (localStorage.getItem('ContactList')){
+  this.setState({contacts:JSON.parse(localStorage.getItem('ContactList'))})}
+  }
 
-  const [contacts, setContacts] = useLocalStorage('contacts', '');
-  // const componentDidMount() {
-  //   if (localStorage.getItem('ContactList')){
-  // setState({contacts:JSON.parse(localStorage.getItem('ContactList'))})}
-  // }
-
-  // const componentDidUpdate(_, contactList) {
-  //   localStorage.setItem('ContactList', JSON.stringify(state.contacts));
-  // }
+  componentDidUpdate(_, contactList) {
+    localStorage.setItem('ContactList', JSON.stringify(this.state.contacts));
+  }
+  
   
 
-
-  const handleChange = ({ target }) => {
-    setState({...state,
+  handleChange = ({ target }) => {
+    this.setState({
       [target.name]: target.value,
     });
-   
   };
-  const handleSubmit = (e) => {
+  handleSubmit = e => {
     e.preventDefault();
-    const newName = state.contacts.map(e=> e.name)
+    const newName = this.state.contacts.map(e=> e.name)
     if (newName.includes(e.target.name.value)){return alert(`${e.target.name.value} says hello from chat`)}
-    createContact();
-
+    this.createContact();
   }
-  const createContact = () => {
-    
-    const {name, number,contacts} = state
+  createContact = () => {
+    const {name, number,contacts} = this.state
     const singleContact = {
       name,
       number,
       id: generate(),
     }
-    setState({...state, contacts: [...contacts, singleContact]})
+    this.setState({contacts: [...contacts, singleContact]})
   }
-  const filterContacts = (e) => {
-    return state.contacts.filter((e) => e.name.toLowerCase().includes(state.filter))
+  filterContacts = (e) => {
+    // if (e){this.setState({filter:e.target.value.trim()})}
+    // const {contacts,filter} = 
+    return this.state.contacts.filter((e) => e.name.toLowerCase().includes(this.state.filter))
   }
 
-  const changiF1ilter = ({target}) => {
-    setState({...state, filter:target.value})
+  changiF1ilter = ({target}) => {
+    this.setState({filter:target.value})
   }
-  const deleteContact = (id) => {
-   setState((prevState)=>({...state, contacts:prevState.contacts.filter(e=>e.id !==id)}))
+  deleteContact = (id) => {
+   this.setState((prevState)=>({contacts:prevState.contacts.filter(e=>e.id !==id)}))
   }
- 
+  render() {
 
-    return (<>
-        <form onSubmit={handleSubmit}>
+    return (
+        <>
+        <form onSubmit={this.handleSubmit}>
           <h1>Phonebook</h1>
           <h2>Name</h2>
           <input
@@ -77,7 +75,7 @@ const InputForm =() => {
             pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
             title="Имя может состоять только из букв, апострофа, тире и пробелов. Например Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan и т. п."
             required
-            onChange={handleChange}
+            onChange={this.handleChange}
           />
           <h2>Number</h2>
          <input
@@ -86,19 +84,17 @@ const InputForm =() => {
             pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
             title="Номер телефона должен состоять цифр и может содержать пробелы, тире, круглые скобки и может начинаться с +"
             required
-            onChange={handleChange}
+            onChange={this.handleChange}
           />
           <button type="submit">Add contact</button>
           </form>
           
-          <FilterContacts filtered={changiF1ilter} />
+          <FilterContacts filtered={this.changiF1ilter} />
           
           <h3>Contacts</h3>
-          <ContactList filteredContacts={filterContacts()} deleteContact={deleteContact}/>
+          <ContactList filteredContacts={this.filterContacts()} deleteContact={this.deleteContact}/>
         </>
 
-    )
-  
+    );
+  }
 }
-
-export default InputForm
